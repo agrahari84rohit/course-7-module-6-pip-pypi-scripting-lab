@@ -1,19 +1,50 @@
+"""Automation helper for the pip/PyPI scripting lab."""
+
 from datetime import datetime
-import os
+
+import requests
+
+
+DEFAULT_LOG_DATA = [
+    "User logged in",
+    "User updated profile",
+    "Report exported",
+]
+
 
 def generate_log(data):
-    # TODO: Implement log generation logic
+    """Write a daily log file and return its filename."""
+    if not isinstance(data, list):
+        raise ValueError("data must be a list of log entries")
 
-    # STEP 1: Validate input
-    # Hint: Check if data is a list
+    filename = f"log_{datetime.now().strftime('%Y%m%d')}.txt"
 
-    # STEP 2: Generate a filename with today's date (e.g., "log_20250408.txt")
-    # Hint: Use datetime.now().strftime("%Y%m%d")
+    with open(filename, "w", encoding="utf-8") as file:
+        for entry in data:
+            file.write(f"{entry}\n")
 
-    # STEP 3: Write the log entries to a file using File I/O
-    # Use a with open() block and write each line from the data list
-    # Example: file.write(f"{entry}\n")
+    return filename
 
-    # STEP 4: Print a confirmation message with the filename
 
-    pass
+def fetch_post_data():
+    """Fetch a sample post from jsonplaceholder using requests."""
+    try:
+        response = requests.get("https://jsonplaceholder.typicode.com/posts/1", timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as exc:
+        print(f"Warning: unable to fetch API data: {exc}")
+        return {}
+
+
+def main():
+    """Run the automation tool from the command line."""
+    filename = generate_log(DEFAULT_LOG_DATA)
+    post = fetch_post_data()
+
+    print(f"Log written to {filename}")
+    print("Fetched Post Title:", post.get("title", "No title found"))
+
+
+if __name__ == "__main__":
+    main()
